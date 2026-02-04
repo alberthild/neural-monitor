@@ -265,6 +265,28 @@ This dashboard was built to visualize [OpenClaw's Event-Sourced Memory system](h
 
 **This Dashboard:** Makes the invisible visible. Watch 200k+ events flow through your agent family in real-time.
 
+## 🎯 The Killer Feature: Training Data
+
+Your event stream isn't just for monitoring — **it's a fine-tuning dataset**.
+
+Every conversation, every tool call, every decision your agent makes becomes training data for your own "mini-Claude":
+
+```bash
+# Extract training pairs from last 7 days
+node scripts/training-data-extractor.mjs 168 --min-quality=0.5
+
+# Output: training-data/
+# ├── openai-fine-tune.jsonl    # For OpenAI fine-tuning
+# └── alpaca-lora.json          # For local LoRA training
+```
+
+**Quality Signals Detected:**
+- ✅ Positive feedback ("super", "genau", "perfekt", 👍)
+- ❌ Negative signals (corrections, "nicht richtig")
+- 📊 Exchange quality scoring
+
+**The Vision:** Run your personalized local model trained on YOUR agent's actual conversations. Same personality, same knowledge, fraction of the cost.
+
 ## Related
 
 - **[OpenClaw](https://github.com/moltbot/moltbot)** — The AI agent framework
