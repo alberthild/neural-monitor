@@ -2,3 +2,15 @@ node_modules/
 dist/
 .DS_Store
 *.log
+.env
+.env.local
+.env.*.local
+
+# Editor directories
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+Thumbs.db

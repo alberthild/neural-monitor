@@ -11,6 +11,7 @@ import http from 'http'
 const NATS_URL = process.env.NATS_URL || 'nats://localhost:4222'
 const WS_PORT = parseInt(process.env.WS_PORT || '8765')
 const HTTP_PORT = parseInt(process.env.HTTP_PORT || '8766')
+const NATS_CLI = process.env.NATS_CLI || 'nats'  // Path to nats CLI binary
 
 const sc = StringCodec()
 let nc = null
@@ -42,11 +43,12 @@ const bridgeStartTime = Date.now()
 
 // Agent configuration
 const AGENTS = {
-  main: { name: 'Claudia', emoji: '🛡️', stream: 'openclaw-events' },
-  'mondo-assistant': { name: 'Mona', emoji: '🌙', stream: 'events-mondo-assistant' },
-  vera: { name: 'Vera', emoji: '🔒', stream: 'events-vera' },
-  stella: { name: 'Stella', emoji: '💰', stream: 'events-stella' },
-  viola: { name: 'Viola', emoji: '⚙️', stream: 'events-viola' }
+  main: { name: 'Claudia', emoji: '🛡️', stream: 'openclaw-events', subject: 'openclaw.events.main.>' },
+  'mondo-assistant': { name: 'Mona', emoji: '🌙', stream: 'openclaw-events', subject: 'openclaw.events.mondo-assistant.>' },
+  vera: { name: 'Vera', emoji: '🔒', stream: 'openclaw-events', subject: 'openclaw.events.vera.>' },
+  stella: { name: 'Stella', emoji: '💰', stream: 'openclaw-events', subject: 'openclaw.events.stella.>' },
+  viola: { name: 'Viola', emoji: '⚙️', stream: 'openclaw-events', subject: 'openclaw.events.viola.>' },
+  agent: { name: 'Legacy (pre-fix)', emoji: '📦', stream: 'openclaw-events', subject: 'openclaw.events.agent.>' }
 }
 
 // Connect to NATS
@@ -68,7 +70,7 @@ async function connectNats() {
       const { execSync } = await import('child_process')
       // Use monitor credentials for CLI
       const natsCliUrl = NATS_URL.includes('@') ? `-s "${NATS_URL}"` : ''
-      const output = execSync(`/home/keller/bin/nats ${natsCliUrl} stream subjects openclaw-events --json 2>/dev/null`).toString()
+      const output = execSync(`${NATS_CLI} ${natsCliUrl} stream subjects openclaw-events --json 2>/dev/null`).toString()
       const subjects = JSON.parse(output)
       stats.subCategories = {}
       
@@ -186,21 +188,29 @@ function startHttp() {
         stats.subCategories = {}
         stats.agents = {}
         
+        // Get all subjects from the unified stream once
+        let allSubjects = {}
+        try {
+          const subjectsOutput = execSync(`${NATS_CLI} stream subjects openclaw-events --json 2>/dev/null`).toString()
+          allSubjects = JSON.parse(subjectsOutput) || {}
+        } catch (e) {}
+        
         for (const [agentId, agentConfig] of Object.entries(AGENTS)) {
           try {
-            // Get stream info
-            const infoOutput = execSync(`/home/keller/bin/nats stream info ${agentConfig.stream} --json 2>/dev/null`).toString()
-            const info = JSON.parse(infoOutput)
-            const messages = info?.state?.messages || 0
-            const bytes = info?.state?.bytes || 0
-            const lastTs = info?.state?.last_ts || null
+            // Filter subjects for this agent
+            const agentSubjectPrefix = `openclaw.events.${agentId}.`
+            const subjects = {}
+            let messages = 0
             
-            // Get subject breakdown
-            let subjects = {}
-            try {
-              const subjectsOutput = execSync(`/home/keller/bin/nats stream subjects ${agentConfig.stream} --json 2>/dev/null`).toString()
-              subjects = JSON.parse(subjectsOutput) || {}
-            } catch (e) {}
+            for (const [subject, count] of Object.entries(allSubjects)) {
+              if (subject.startsWith(agentSubjectPrefix)) {
+                subjects[subject] = count
+                messages += count
+              }
+            }
+            
+            const bytes = 0 // Can't easily get per-agent bytes
+            const lastTs = null // Would need to query
             
             // Calculate event types for this agent
             let msgIn = 0, msgOut = 0, toolCalls = 0, lifecycle = 0

@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useRef, Suspense } from 'react'
 import EventDetails from './components/EventDetails'
 import EventLog from './components/EventLog'
+import BrainPanel from './components/BrainPanel'
 
 // Lazy load Three.js component
 const NeuralViz = React.lazy(() => import('./components/NeuralViz'))
 
-const WS_URL = 'ws://192.168.0.20:8765'
+// Configurable endpoints (set via environment variables)
+const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8765'
+const STATS_URL = import.meta.env.VITE_STATS_URL || 'http://localhost:8766'
 
 export default function App() {
   const [events, setEvents] = useState([])
@@ -37,7 +40,7 @@ export default function App() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await fetch('http://192.168.0.20:8766/stats')
+        const res = await fetch(`${STATS_URL}/stats`)
         if (res.ok) {
           const data = await res.json()
           setHistoricCounts(data.byType || {})
@@ -249,6 +252,9 @@ export default function App() {
           })
         }}
       />
+
+      {/* Brain Panel - Commitments & Learning */}
+      <BrainPanel />
 
       {/* Event Details Modal */}
       {selectedEvent && (

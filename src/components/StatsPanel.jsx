@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react'
 
+// Configurable endpoint (set via environment variable)
+const STATS_URL = import.meta.env.VITE_STATS_URL || 'http://localhost:8766'
+
 const statConfig = [
   { key: 'messages', icon: '💬', label: 'Messages', color: '#22d3ee' },
   { key: 'tools', icon: '🔧', label: 'Tools', color: '#a78bfa' },
@@ -41,7 +44,7 @@ export default function StatsPanel({ stats, nodeStats }) {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await fetch('http://192.168.0.20:8766/stats')
+        const res = await fetch(`${STATS_URL}/stats`)
         if (res.ok) {
           const data = await res.json()
           setHistoricTotal(data.total || 4082)
