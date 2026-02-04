@@ -1,6 +1,10 @@
 # Neural Monitor 🛡️
 
-A real-time 3D visualization dashboard for AI agent event streams. Watch your AI agents communicate, process events, and learn — with beautiful WebGL-powered graphics.
+**A real-time 3D visualization dashboard for [OpenClaw](https://github.com/moltbot/moltbot) AI agents.**
+
+Watch your agents communicate, process events, and learn — with beautiful WebGL-powered graphics.
+
+> 🔗 **Built for [PR #7358: Event-Sourced Memory](https://github.com/moltbot/moltbot/pull/7358)** — Persistent memory via NATS JetStream
 
 ![Neural Monitor Dashboard](docs/screenshot.png)
 
@@ -251,11 +255,25 @@ When agents communicate with each other, dedicated beams connect them visually.
 
 MIT License — feel free to use, modify, and distribute.
 
-## Credits
+## Background
 
-Built for monitoring [OpenClaw](https://github.com/moltbot/moltbot) AI agents.
+This dashboard was built to visualize [OpenClaw's Event-Sourced Memory system](https://github.com/moltbot/moltbot/pull/7358) in action.
 
-Inspired by neural network visualizations and sci-fi interfaces.
+**The Problem:** AI agents lose context between sessions. Every restart = amnesia.
+
+**The Solution:** Stream all agent events to NATS JetStream. Events become the source of truth — replayable, queryable, persistent.
+
+**This Dashboard:** Makes the invisible visible. Watch 200k+ events flow through your agent family in real-time.
+
+## Related
+
+- **[OpenClaw](https://github.com/moltbot/moltbot)** — The AI agent framework
+- **[PR #7358](https://github.com/moltbot/moltbot/pull/7358)** — Event-Sourced Memory feature
+- **[NATS JetStream](https://docs.nats.io/nats-concepts/jetstream)** — The streaming backbone
+
+## License
+
+MIT License — feel free to use, modify, and distribute.
 
 ---
 
